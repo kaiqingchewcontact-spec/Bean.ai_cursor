@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -27,7 +26,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   final _picker = ImagePicker();
 
-  bool _emailReadOnly = false;
   String? _avatarUrl;
   List<String> _origins = [];
   List<String> _processes = [];
@@ -44,14 +42,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _syncFromProfile(UserProfile? profile) {
-    final authEmail = FirebaseAuth.instance.currentUser?.email;
-    _emailReadOnly = authEmail != null && authEmail.isNotEmpty;
-
     if (profile != null) {
       _nameController.text = profile.displayName ?? '';
-      _emailController.text = _emailReadOnly
-          ? authEmail!
-          : (profile.email ?? '');
+      _emailController.text = profile.email ?? '';
       _avatarUrl = profile.avatarUrl;
       final p = profile.preferences;
       _origins = List.of(p.favoriteOrigins);
@@ -65,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           : AppConstants.brewMethods[0];
     } else {
       _nameController.clear();
-      _emailController.text = authEmail ?? '';
+      _emailController.clear();
       _avatarUrl = null;
       _origins = [];
       _processes = [];
@@ -97,10 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final id = existing?.id ?? uuid.v4();
     final createdAt = existing?.createdAt ?? DateTime.now();
 
-    final authEmail = FirebaseAuth.instance.currentUser?.email;
-    final email = (_emailReadOnly && authEmail != null && authEmail.isNotEmpty)
-        ? authEmail
-        : _emailController.text.trim();
+    final email = _emailController.text.trim();
 
     final newPrefs = UserPreferences(
       favoriteOrigins: _origins,
@@ -230,17 +220,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _emailController,
-              readOnly: _emailReadOnly,
               keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Email',
-                prefixIcon: const Icon(Icons.mail_outline_rounded),
-                helperText: _emailReadOnly
-                    ? 'Managed by your sign-in provider'
-                    : null,
+                prefixIcon: Icon(Icons.mail_outline_rounded),
               ),
               validator: (v) {
-                if (_emailReadOnly) return null;
                 if (v == null || v.trim().isEmpty) return null;
                 final email = v.trim();
                 final ok = RegExp(r'^[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}$').hasMatch(email);

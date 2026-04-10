@@ -18,6 +18,7 @@ class AppState extends ChangeNotifier {
   List<TastingNote> _tastingNotes = [];
   List<Subscription> _subscriptions = [];
   UserProfile? _userProfile;
+  bool _onboardingComplete = false;
   bool _isLoading = false;
   String? _error;
 
@@ -25,7 +26,8 @@ class AppState extends ChangeNotifier {
     required StorageService storage,
     required AiService aiService,
   })  : _storage = storage,
-        _aiService = aiService;
+        _aiService = aiService,
+        _onboardingComplete = storage.isOnboardingComplete;
 
   // Getters
   List<Bean> get beans => _beans;
@@ -50,6 +52,7 @@ class AppState extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isPremium => _userProfile?.isPremium ?? false;
+  bool get isOnboardingComplete => _onboardingComplete;
   AiService get aiService => _aiService;
 
   int get totalBrewsThisWeek {
@@ -85,6 +88,7 @@ class AppState extends ChangeNotifier {
       _tastingNotes = _storage.getAllTastingNotes();
       _subscriptions = _storage.getAllSubscriptions();
       _userProfile = _storage.getUserProfile();
+      _onboardingComplete = _storage.isOnboardingComplete;
       _error = null;
     } catch (e) {
       _error = 'Failed to load data: $e';
@@ -170,6 +174,18 @@ class AppState extends ChangeNotifier {
   Future<void> updateProfile(UserProfile profile) async {
     await _storage.saveUserProfile(profile);
     _userProfile = profile;
+    notifyListeners();
+  }
+
+  Future<void> completeOnboarding() async {
+    await _storage.setOnboardingComplete();
+    _onboardingComplete = true;
+    notifyListeners();
+  }
+
+  Future<void> resetOnboardingForSignOut() async {
+    await _storage.clearOnboardingFlag();
+    _onboardingComplete = false;
     notifyListeners();
   }
 

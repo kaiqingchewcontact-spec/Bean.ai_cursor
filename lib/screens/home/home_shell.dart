@@ -1,82 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../config/theme.dart';
-import '../../providers/app_state.dart';
 
 /// Main app shell with bottom navigation and a centered scan FAB.
-class HomeShell extends StatefulWidget {
-  const HomeShell({super.key, required this.child});
+class HomeShell extends StatelessWidget {
+  const HomeShell({super.key, required this.navigationShell});
 
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
-  @override
-  State<HomeShell> createState() => _HomeShellState();
-}
-
-class _HomeShellState extends State<HomeShell> {
   static const List<_ShellTab> _tabs = [
-    _ShellTab(label: 'Home', icon: Icons.home_rounded, path: '/'),
+    _ShellTab(label: 'Home', icon: Icons.home_rounded, branchIndex: 0),
     _ShellTab(
       label: 'Library',
       icon: Icons.inventory_2_rounded,
-      path: '/library',
+      branchIndex: 1,
     ),
     _ShellTab(
       label: 'Brew',
       icon: Icons.coffee_maker_rounded,
-      path: '/brew',
+      branchIndex: 2,
     ),
     _ShellTab(
       label: 'Journal',
       icon: Icons.book_rounded,
-      path: '/journal',
+      branchIndex: 3,
     ),
     _ShellTab(
       label: 'Discover',
       icon: Icons.explore_rounded,
-      path: '/discover',
+      branchIndex: 4,
     ),
   ];
 
-  int _indexForLocation(String location) {
-    if (location == '/' || location.isEmpty) return 0;
-    if (location.startsWith('/library')) return 1;
-    if (location.startsWith('/brew')) return 2;
-    if (location.startsWith('/journal')) return 3;
-    if (location.startsWith('/discover')) return 4;
-    return 0;
-  }
-
   void _onTabSelected(int index) {
-    final path = _tabs[index].path;
-    if (path == '/') {
-      context.go('/');
-    } else {
-      context.go(path);
-    }
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    context.watch<AppState>();
-
-    final routerState = GoRouterState.of(context);
-    final location = routerState.uri.path;
-    final selectedIndex = _indexForLocation(location);
+    final selectedIndex = navigationShell.currentIndex;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final barColor = isDark ? BeanTheme.darkSurface : Colors.white;
     final selectedColor = isDark ? BeanTheme.caramel : BeanTheme.espresso;
-    final unselectedColor =
-        isDark ? BeanTheme.crema.withOpacity(0.45) : BeanTheme.lightRoast.withOpacity(0.55);
+    final unselectedColor = isDark
+        ? BeanTheme.crema.withOpacity(0.45)
+        : BeanTheme.lightRoast.withOpacity(0.55);
     final borderColor =
         isDark ? BeanTheme.darkCard : BeanTheme.latte.withOpacity(0.9);
 
     return Scaffold(
       extendBody: true,
-      body: widget.child,
+      body: navigationShell,
       floatingActionButton: Material(
         elevation: 8,
         shadowColor: BeanTheme.espresso.withOpacity(0.35),
@@ -179,12 +158,12 @@ class _ShellTab {
   const _ShellTab({
     required this.label,
     required this.icon,
-    required this.path,
+    required this.branchIndex,
   });
 
   final String label;
   final IconData icon;
-  final String path;
+  final int branchIndex;
 }
 
 class _NavSlot extends StatelessWidget {

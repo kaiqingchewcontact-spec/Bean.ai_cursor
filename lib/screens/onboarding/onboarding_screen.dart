@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../config/theme.dart';
+import '../../providers/app_state.dart';
 
 /// Bean.ai onboarding — three animated pages with coffee-themed gradients.
 class OnboardingScreen extends StatefulWidget {
@@ -61,9 +63,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void _goHome() {
+  Future<void> _finishOnboarding() async {
     if (!mounted) return;
-    context.go('/');
+    await context.read<AppState>().completeOnboarding();
+    if (!mounted) return;
+    context.go('/paywall');
   }
 
   @override
@@ -86,7 +90,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 8, right: 8),
                 child: TextButton(
-                  onPressed: _goHome,
+                  onPressed: _finishOnboarding,
                   style: TextButton.styleFrom(
                     foregroundColor: BeanTheme.crema.withOpacity(0.95),
                   ),
@@ -158,7 +162,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: _goHome,
+                          onPressed: _finishOnboarding,
                           style: FilledButton.styleFrom(
                             backgroundColor: BeanTheme.honey,
                             foregroundColor: BeanTheme.espresso,
