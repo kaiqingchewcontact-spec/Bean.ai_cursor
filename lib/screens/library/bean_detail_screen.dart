@@ -549,7 +549,6 @@ class _BeanDetailScreenState extends State<BeanDetailScreen> {
                   Text('Your rating', style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
                   RatingBar.builder(
-                    key: ValueKey<double>(bean.rating),
                     initialRating: bean.rating,
                     minRating: 0,
                     allowHalfRating: true,

@@ -40,7 +40,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     }
     return byName.entries.map((e) {
       final list = e.value;
-      final origins = list.map((b) => b.origin).toSet().length;
       return Roaster(
         id: DiscoverScreen.roasterRouteId(e.key),
         name: e.key,

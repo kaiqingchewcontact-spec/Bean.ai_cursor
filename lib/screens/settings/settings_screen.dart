@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -151,11 +150,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     if (ok != true || !mounted) return;
 
-    try {
-      await FirebaseAuth.instance.signOut();
-    } catch (_) {
-      // Firebase may be uninitialized in some environments.
-    }
+    final app = context.read<AppState>();
+    await app.resetOnboardingForSignOut();
     if (!mounted) return;
     context.go('/onboarding');
   }

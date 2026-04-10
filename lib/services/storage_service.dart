@@ -150,6 +150,10 @@ class StorageService {
     await setSetting('onboarding_complete', 'true');
   }
 
+  Future<void> clearOnboardingFlag() async {
+    await _settings.delete('onboarding_complete');
+  }
+
   Future<void> clearAll() async {
     await _beans.clear();
     await _brews.clear();
